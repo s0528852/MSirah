@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, Button } from 'react-native';
-
+import { View, Text, TouchableOpacity, Alert, Button } from 'react-native';
+import Styles from '../styles/page_styles'; // Adjust the path as needed
+import {  Link } from 'expo-router'; 
 
 const GRID_SIZE = 6;
-const CELL_SIZE = 40;
+const CELL_SIZE = 40; // If CELL_SIZE is used in page_styles.js, ensure it's defined there
 const NUM_BOMBS = 12; // Total number of bombs
 const GAME_DURATION = 60; // Game duration in seconds
 
@@ -13,10 +14,8 @@ const Minesweeper = () => {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [gameActive, setGameActive] = useState(true);
 
-
   useEffect(() => {
     initializeGame();
-    // Start the timer
     const timerId = gameActive && setInterval(() => {
       setTimeLeft((prevTime) => prevTime - 1);
     }, 1000);
@@ -62,8 +61,7 @@ const Minesweeper = () => {
   };
 
   const handlePress = (row, col) => {
-    if (!gameActive) return; // Ignore clicks if the game is not active
-
+    if (!gameActive) return;
     if (grid[row][col].isBomb) {
       endGame("You clicked on a bomb! Game over.");
     } else {
@@ -83,7 +81,6 @@ const Minesweeper = () => {
   const leaveGame = () => {
     Alert.alert("LEAVE GAME", "YOU HAVE LEFT THE GAME", [{ text: "CONFIRM" }]);
     setGameActive(false);
-    // Optionally reset the game here or navigate away
   };
 
   const renderCell = (row, col) => {
@@ -91,7 +88,7 @@ const Minesweeper = () => {
     return (
       <TouchableOpacity
         key={`${row}-${col}`}
-        style={[styles.cell, cell.revealed ? styles.revealed : {}]}
+        style={[Styles.cell, cell.revealed ? Styles.revealed : {}]}
         onPress={() => handlePress(row, col)}
         disabled={!gameActive || cell.revealed}
       >
@@ -102,16 +99,24 @@ const Minesweeper = () => {
 
   const renderGrid = () => {
     return grid.map((row, rowIndex) => (
-      <View key={rowIndex} style={styles.row}>
+      <View key={rowIndex} style={Styles.row}>
         {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
       </View>
     ));
   };
 
   return (
-    <View style={styles.container}>
-      <Text>!HARD MODE 12 BOMBS!</Text>
-      <Text style={styles.score}>Score: {score}</Text>
+    <View style={Styles.container}>
+
+      <View style={Styles.page}>
+      <Link href="/" asChild>
+        <TouchableOpacity style={Styles.backButton}>
+          <Text>... Return Home ...</Text>
+        </TouchableOpacity>
+      </Link>
+      
+      <Text>EASY MODE 2 BOMBS</Text>
+      <Text style={Styles.score}>Score: {score}</Text>
       <Text>Time Left: {timeLeft}s</Text>
       {renderGrid()}
       <View style={{ marginVertical: 10 }}>
@@ -119,36 +124,9 @@ const Minesweeper = () => {
         {!gameActive && <Button title="Restart Game" onPress={initializeGame} color="#841584" />}
         <Button title="Leave Game" onPress={leaveGame} color="red" />
       </View>
-    </View>
-  );  
+       </View>
+      </View>
+  );
 };
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#f0f0f0',
-    },
-    row: {
-      flexDirection: 'row',
-    },
-    cell: {
-      width: CELL_SIZE,
-      height: CELL_SIZE,
-      borderWidth: 1,
-      borderColor: '#999',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#ddd',
-    },
-    revealed: {
-      backgroundColor: '#bbb',
-    },
-    score: {
-      fontSize: 24,
-      margin: 20,
-    },
-  }); 
 
 export default Minesweeper;
