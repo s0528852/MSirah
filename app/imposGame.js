@@ -11,7 +11,7 @@ import { Link } from 'expo-router';
 
 const GRID_SIZE = 8;
 const CELL_SIZE = 40;
-const NUM_BOMBS = 0;
+const NUM_BOMBS = 24;
 const GAME_DURATION = 60;
 
 const Minesweeper = () => {
@@ -68,19 +68,29 @@ const Minesweeper = () => {
 
     const handlePress = (row, col) => {
         if (!gameActive) return;
-        let newGrid = [...grid];
         if (grid[row][col].isBomb) {
             endGame("You clicked on a bomb! Game over.");
         } else {
-            newGrid[row][col].revealed = true;
-            let allCellsRevealed = checkAllCellsRevealed(newGrid);
+            const newGrid = grid.map((r, rowIndex) => 
+              r.map((cell, colIndex) => {
+                if (rowIndex === row && colIndex === col) {
+                  return { ...cell, revealed: true };
+                } else {
+                  return cell;
+                }
+              })
+            );
+            setGrid(newGrid);
+            if (!newGrid[row][col].isBomb) {
+                setScore(currentScore => currentScore + 100);
+            }
+            const allCellsRevealed = checkAllCellsRevealed(newGrid);
             if(allCellsRevealed) {
                 Alert.alert("Congrats", "You won Meme Sweeper", [{ text: "Restart", onPress: () => initializeGame() }]);
-                return;
             }
-            setGrid(newGrid);
         }
     };
+    
 
     const checkAllCellsRevealed = (grid) => {
         for (let row of grid) {
@@ -128,8 +138,7 @@ const Minesweeper = () => {
     return (
         <View style={Styles.container}>
             <Text>!!IMPOSSIBLE MODE 24 BOMBS!!</Text>
-            <Text style={Styles.score}>Score
-: {score}</Text>
+            <Text style={Styles.score}>Score: {score}</Text>
       <Text>Time Left: {timeLeft}s</Text>
       {renderGrid()}
       <View style={{ marginVertical: 10 }}>
